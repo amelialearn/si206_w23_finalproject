@@ -8,30 +8,27 @@ import json
 import sqlite3
 import os
 
-def movie():
+def movies():
+    conn = sqlite3.connect('movies.db')
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, genre TEXT, rating FLOAT, box_office TEXT)")
+    
     movie_key = "99b5ee6f"
-    url = f"http://www.omdbapi.com/?apikey={movie_key}&type=movie&s=&y=&r=json&plot=short&tomatoes=true&certification=R&sort_by=imdbRating&desc=true"
-    response = requests.get(url)
-    movies = response.json()["Search"]
-    #d = json.loads(movies)
-    print(movies)
+    num_movies = 100
+    for i in range(num_movies + 1):
+        imdb_id = f"tt00{i:02d}0000"
+        url = f"http://www.omdbapi.com/?apikey={movie_key}&i={imdb_id}&plot=full"
+        response = requests.get(url)
+        movies = response.json()
+        title = movies["Title"]
+        year = int(movies["Year"])
+        genre = movies["Genre"]
+        rating = float(movies["imdbRating"])
+        box_office = movies["BoxOffice"]
+        cur.execute("INSERT INTO movies (title, year, genre, rating, box_office) VALUES (?, ?, ?, ?, ?)", (title, year, genre, rating, box_office))
+        conn.commit()
 
-    # for i in range(25):
-    #     for movie in movies:
-    #         title = movie["Title"]
-    #         year = int(movie["Year"])
-    #         genre = movie["Genre"]
-    #         rating = float(movie["imdbRating"])
-    #         box_office = movie["BoxOffice"]
-
-    #         conn = sqlite3.connect('movies.db')
-    #         cur = conn.cursor()
-    #         cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, year INTEGER, genre TEXT, rating FLOAT, box_office TEXT);")
-    #         cur.execute("INSERT INTO movies (title, year, rating, box_office) VALUES (?, ?, ?, ?, ?, ?)", (title, year, genre, rating, box_office))
-    #         conn.commit()
-    # conn.close()
-
-movie()
+    conn.close()
 
 #tv show information
 

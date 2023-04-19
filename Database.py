@@ -14,14 +14,15 @@ def movies():
     cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, genre TEXT, rating FLOAT, box_office TEXT)")
     
     movie_key = "99b5ee6f"
-    url = f"http://www.omdbapi.com/?apikey={movie_key}&"
+    url = f"http://www.omdbapi.com/?apikey={movie_key}&type=movie&s&y=&r=json&plot=full&page=1"
     response = requests.get(url)
-    movies = response.json()
+    data = response.json()
 
+    movies = data["Search"]
     for movie in movies:
         id = movie["imdbID"]
         new_url = f"http://www.omdbapi.com/?apikey={movie_key}&i={id}&plot=full"
-        new_response = requests.get(url)
+        new_response = requests.get(new_url)
         each_movie = new_response.json()
 
         title = each_movie["Title"]

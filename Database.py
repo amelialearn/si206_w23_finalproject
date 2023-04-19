@@ -14,21 +14,27 @@ def movies():
     cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, genre TEXT, rating FLOAT, box_office TEXT)")
     
     movie_key = "99b5ee6f"
-    num_movies = 100
-    for i in range(num_movies + 1):
-        imdb_id = f"tt00{i:02d}0000"
-        url = f"http://www.omdbapi.com/?apikey={movie_key}&i={imdb_id}&plot=full"
-        response = requests.get(url)
-        movies = response.json()
-        title = movies["Title"]
-        year = int(movies["Year"])
-        genre = movies["Genre"]
-        rating = float(movies["imdbRating"])
-        box_office = movies["BoxOffice"]
+    url = f"http://www.omdbapi.com/?apikey={movie_key}&"
+    response = requests.get(url)
+    movies = response.json()
+
+    for movie in movies:
+        id = movie["imdbID"]
+        new_url = f"http://www.omdbapi.com/?apikey={movie_key}&i={id}&plot=full"
+        new_response = requests.get(url)
+        each_movie = new_response.json()
+
+        title = each_movie["Title"]
+        year = int(each_movie["Year"])
+        genre = each_movie["Genre"]
+        rating = float(each_movie["imdbRating"])
+        box_office = each_movie["BoxOffice"]
         cur.execute("INSERT INTO movies (title, year, genre, rating, box_office) VALUES (?, ?, ?, ?, ?)", (title, year, genre, rating, box_office))
         conn.commit()
 
     conn.close()
+
+movies()
 
 #tv show information
 

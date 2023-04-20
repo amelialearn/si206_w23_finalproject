@@ -11,7 +11,87 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
 from pprint import pprint
 
-#song information
+#TVSHOES!!
+
+# sources: https://www.w3resource.com/sql/creating-and-maintaining-tables/primary-key.php
+#          https://www.youtube.com/watch?v=FrTQSPSbVC0
+#          https://www.youtube.com/watch?v=I5L3OJ-xtsw
+#          https://www.youtube.com/watch?v=Anxj5AmSG2E
+
+# this function uses BeautifulSoup to extract the runtime from each tv show's imdb page
+def get_runtime(url):
+    # saw this on https://www.youtube.com/watch?v=I5L3OJ-xtsw
+    # sends a request to the imdb url
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    response = requests.get(url, headers = headers)
+
+    # use BeautifulSoup to find the runtime element
+    soup = BeautifulSoup(response.content, 'html.parser')
+    runtime_element = soup.find('li', {'data-testid': 'title-techspec_runtime'})
+
+    # extract runtime information, return text
+    if runtime_element:
+        runtime = runtime_element.find('div', {'class': 'ipc-metadata-list-item__content-container'}).text.strip()
+        return runtime
+    # if not found, return "N/A"
+    else:
+        return 'N/A'
+
+# creats a new table (if it doesn't exist) in the database called "tv_shows"
+def create_tv_shows_table(cursor):
+    cursor.execute("CREATE TABLE IF NOT EXISTS tv_shows (key_ID INTEGER PRIMARY KEY, imdb_ID TEXT UNIQUE, year TEXT, title TEXT, runtime TEXT, FOREIGN KEY (key_ID) REFERENCES show_info(key_ID))")
+
+# creats a new table (if it doesn't exist) in the database called "show_info"
+def create_show_info_table(cursor):
+    cursor.execute("CREATE TABLE IF NOT EXISTS show_info (key_ID INTEGER PRIMARY KEY, imdb_rating TEXT)")
+
+def populate_database(cursor, item):
+    # add information to db the item and fetch the runtime information
+    show_id = item['id']
+    title = item['title']
+    year = item['year']
+    imdb_rating = item['imDbRating']
+    url = f"https://www.imdb.com/title/{show_id}/"
+    runtime = get_runtime(url)
+
+    # add the IMDB rating to the show_info table
+    cursor.execute("INSERT OR IGNORE INTO show_info (imdb_rating) VALUES (?)", (imdb_rating,))
+    # get the id of the last row
+    title_id = cursor.lastrowid
+
+    # add to the tv_shows table
+    cursor.execute("INSERT OR IGNORE INTO tv_shows (key_ID, imdb_ID, year, title, runtime) VALUES (?, ?, ?, ?, ?)", (title_id, show_id, year, title, runtime))
+
+def tv_shows():
+    # create a path to the databas
+    db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'TV_shows74.db')
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    create_show_info_table(cursor)
+    create_tv_shows_table(cursor)
+
+    # get tv shows from IMDB API
+    data = requests.get("https://imdb-api.com/en/API/MostPopularTVs/k_i1gw86cb").json()
+    new_items = 0
+    tv_shows = data['items']
+    for show in tv_shows:
+        # check if the Tv show is already in the database
+        cursor.execute("SELECT COUNT(*) FROM tv_shows WHERE imdb_ID = ?", (show['id'],))
+        count = cursor.fetchone()[0]
+
+        # if the TV show is not in the database, add it
+        if count == 0:
+            populate_database(cursor, show)
+            new_items = new_items + 1
+            # limit the number of new TV shows added to 25
+            if new_items >= 25:
+                break
+
+    conn.commit()
+    conn.close()
+
+#MUSIC!!!!!
 def music():
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
@@ -47,7 +127,7 @@ def music():
             conn.commit()
     conn.close()
 
-
+#MOVIES
 def movies():
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + 'movies.db')
@@ -90,8 +170,9 @@ def movies():
             conn.commit()
 
     conn.close()
-#tv show information
+
 
 #calling functions
 music()
 movies()
+tv_shows()

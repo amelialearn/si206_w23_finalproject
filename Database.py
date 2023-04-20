@@ -11,8 +11,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
 from pprint import pprint
 
-
-
+#song information
 def music():
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
@@ -22,19 +21,23 @@ def music():
     conn = sqlite3.connect(path + '/' + 'songs.db')
     cur = conn.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS songs (title TEXT, runtime TEXT)")
+    cur.execute("SELECT COUNT(*) FROM songs")
+    num = cur.fetchone()[0]
+    if num==100:
+        return
 
-    while True:
-        response = sp.playlist_items(pl_id,
+
+    
+   
+
+    
+        
+
+    for i in range(num,num+25):
+            response = sp.playlist_items(pl_id,
                                     offset=offset,
                                     fields='items.track.name,items.track.duration_ms,total',
                                     additional_types=['track'])
-
-        if len(response['items']) == 0:
-            break
-
-        #for track in response['items']:
-        num=len(cur.fetchall())
-        for i in range(num,25):
             track= response["items"][i]
             track_name = track['track']['name']
             track_duration_ms = track['track']['duration_ms']
@@ -42,9 +45,8 @@ def music():
             print(f"{track_name} - {track_duration_min:.2f} minutes")
             cur.execute("INSERT INTO songs (title, runtime) VALUES (?, ?)", (track_name, track_duration_min))
             conn.commit()
+    conn.close()
 
-        offset = offset + len(response['items'])
-        print(offset, "/", response['total'])
 
 def movies():
     path = os.path.dirname(os.path.abspath(__file__))
@@ -88,9 +90,8 @@ def movies():
             conn.commit()
 
     conn.close()
-
-movies()
-
 #tv show information
 
-#song information
+#calling functions
+music()
+movies()

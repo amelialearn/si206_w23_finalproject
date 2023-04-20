@@ -11,11 +11,20 @@ import os
 def movies():
     conn = sqlite3.connect('movies.db')
     cur = conn.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, runtime TEXT, genre TEXT, rating FLOAT, box_office TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, runtime TEXT, genre TEXT, rating FLOAT)")
     
-    list_movies = ["The Shawshank Redemption", "The Godfather", "The Dark Knight", "Schindler's List", "The Lord of the Rings: The Return of the King", "12 Angry Men", "The Godfather Part II", "Pulp Fiction", "Inception", "The Lord of the Rings: The Fellowship of the Ring", "Fight Club"]
-    all_movies = []
+    list_movies = []
 
+    pop_key = "a506d5e4266f12c3ad717faf978c7d29"
+    for i in range(1,7):
+        pop_url = f"https://api.themoviedb.org/3/movie/top_rated?api_key={pop_key}&language=en-US&page={i}"
+        pop_res = requests.get(pop_url)
+        pop_movies = pop_res.json()["results"]
+        for piece in pop_movies:
+            list_movies.append(piece["title"])
+    
+    all_movies = []
+    
     for item in list_movies:
         movie_key = "99b5ee6f"
         url = f"http://www.omdbapi.com/?t={item}&apikey={movie_key}"
@@ -24,14 +33,16 @@ def movies():
         all_movies.append(data)
 
     for movie in all_movies:
-        title = movie["Title"]
-        year = int(movie["Year"])
-        runtime = movie["Runtime"]
-        genre = movie["Genre"]
-        rating = float(movie["imdbRating"])
-        box_office = movie["BoxOffice"]
-        cur.execute("INSERT INTO movies (title, year, runtime, genre, rating, box_office) VALUES (?, ?, ?, ?, ?, ?)", (title, year, runtime, genre, rating, box_office))
-        conn.commit()
+        if movie["Response"] == "False":
+            all_movies.remove(movie)
+        else:
+            title = movie["Title"]
+            year = movie["Year"]
+            runtime = movie["Runtime"]
+            genre = movie["Genre"]
+            rating = movie["imdbRating"]
+            cur.execute("INSERT INTO movies (title, year, runtime, genre, rating) VALUES (?, ?, ?, ?, ?)", (title, year, runtime, genre, rating))
+            conn.commit()
 
     conn.close()
 

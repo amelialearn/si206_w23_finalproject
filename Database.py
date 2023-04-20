@@ -9,7 +9,8 @@ import sqlite3
 import os
 
 def movies():
-    conn = sqlite3.connect('movies.db')
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path + '/' + 'movies.db')
     cur = conn.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, runtime TEXT, genre TEXT, rating FLOAT)")
     
@@ -32,15 +33,19 @@ def movies():
         data = response.json()
         all_movies.append(data)
 
-    for movie in all_movies:
+    num = len(cur.fetchall())
+
+    for i in range(num, 25):
+        movie = all_movies[i]
         if movie["Response"] == "False":
-            all_movies.remove(movie)
+             all_movies.remove(movie)
         else:
             title = movie["Title"]
             year = movie["Year"]
             runtime = movie["Runtime"]
             genre = movie["Genre"]
             rating = movie["imdbRating"]
+
             cur.execute("INSERT INTO movies (title, year, runtime, genre, rating) VALUES (?, ?, ?, ?, ?)", (title, year, runtime, genre, rating))
             conn.commit()
 
@@ -50,4 +55,4 @@ movies()
 
 #tv show information
 
-#twitter/google information
+#song information

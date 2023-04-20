@@ -7,6 +7,44 @@ import requests
 import json
 import sqlite3
 import os
+from spotipy.oauth2 import SpotifyClientCredentials
+import spotipy
+from pprint import pprint
+
+
+
+def music():
+    sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+
+    pl_id = 'spotify:playlist:4hOKQuZbraPDIfaGbM3lKI'
+    offset = 0
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path + '/' + 'songs.db')
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS songs (title TEXT, runtime TEXT)")
+
+    while True:
+        response = sp.playlist_items(pl_id,
+                                    offset=offset,
+                                    fields='items.track.name,items.track.duration_ms,total',
+                                    additional_types=['track'])
+
+        if len(response['items']) == 0:
+            break
+
+        #for track in response['items']:
+        num=len(cur.fetchall())
+        for i in range(num,25):
+            track= response["items"][i]
+            track_name = track['track']['name']
+            track_duration_ms = track['track']['duration_ms']
+            track_duration_min = track_duration_ms / 60000  # Convert duration from milliseconds to minutes
+            print(f"{track_name} - {track_duration_min:.2f} minutes")
+            cur.execute("INSERT INTO songs (title, runtime) VALUES (?, ?)", (track_name, track_duration_min))
+            conn.commit()
+
+        offset = offset + len(response['items'])
+        print(offset, "/", response['total'])
 
 def movies():
     path = os.path.dirname(os.path.abspath(__file__))

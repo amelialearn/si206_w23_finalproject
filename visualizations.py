@@ -9,7 +9,20 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np 
 
+"""
+input: None
 
+output: None - a JSON file containing IMDB rating calculations is created
+               a bar chart displaying average IMDB rating for movies and
+               TV shows grouped by decade
+
+description: This function connects the TOP100 database and selects the IMDB ratings,
+             year, and type for all TV Shows and Movies. It then calculates the average
+             ratings for TV Shows and Movies by decade. (1990s, 2000s, and 2010s) and
+             stores the results in a dictionary. This dictionary is written to a JSON file.
+             A bar chart displaying the average IMDB ratings for TV Shows and movies by
+             decade is created and displayed.
+"""
 def avg_imdb():
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + "TOP100.db")
@@ -91,6 +104,19 @@ def avg_imdb():
 
     conn.close()
 
+
+"""
+input: None
+
+output: None - a plot showing the relationship between IMDB rating and runtime
+               for TV Shows and movies
+
+description: This function gets the IMDB rating and runtime for each TV Show
+             and movie in the TOP100 database. It then calculates the average
+             runtime for each TV Show/movie rating. Then, a plot is created
+             and displayed with the average runtime on the y-axis (in minutes) 
+             compared to the IMDB rating on the x-axis.
+"""
 def rating_runtime():      
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + "TOP100.db")
@@ -162,6 +188,21 @@ def rating_runtime():
 
     conn.close()
 
+
+"""
+input: None
+
+output: None - Three plots displaying runtime information for songs, movies, and TV Shows
+
+description: This function gets the year and runtime for every item in the
+             TOP100 database. Then it calculates the average runtime for songs,
+             movies, and TV Shows for each year and stores the results in a
+             dictionary. The data is then sorted bu year and the slope of the
+             trendline is created for each of the three items, songs, movies, and
+             TV shows. The slope values are saved in a dictionary as a JSON file.
+             Three plots are created displaying the trendline for songs, movies,
+             and TV Shows over the years.
+"""
 def year_runtime():
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + "TOP100.db")
@@ -291,7 +332,17 @@ def year_runtime():
     plt.show()
 
     conn.close()
-    
+
+"""
+input: None
+
+output: None - A horizonal bar chart displaying avergae IMDB rating of movies per genre
+
+description: This function gets the genre and IMDB rating from the movies table in
+             the TOP100 database. Then it calculates the average rating for each
+             movie genre. A horizontal bar chart is then displayed with movie genre on 
+             the y-axis and average IMDB rating on the x-axis.
+"""
 def genre_rating():
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + "TOP100.db")

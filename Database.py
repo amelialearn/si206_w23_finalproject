@@ -31,8 +31,16 @@ def get_runtime(url):
     runtime_element = soup.find('li', {'data-testid': 'title-techspec_runtime'})
 
     # extract runtime information, return text
+    # converting string withhours and minutes into integer representing total minutes
     if runtime_element:
-        runtime = runtime_element.find('div', {'class': 'ipc-metadata-list-item__content-container'}).text.strip()
+        runtime_text = runtime_element.find('div', {'class': 'ipc-metadata-list-item__content-container'}).text.strip()
+        runtime_s = runtime_text.split()
+        if len(runtime_s) == 2 and runtime_s[0] != "1":
+            runtime = int(runtime_s[0])
+        elif len(runtime_s) == 2:
+            runtime = 60
+        elif len(runtime_s) == 4:
+            runtime = int(runtime_s[0]) * 60 + int(runtime_s[2])
         return runtime
     # if not found, return "N/A"
     else:

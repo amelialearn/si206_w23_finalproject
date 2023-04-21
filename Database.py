@@ -10,6 +10,7 @@ import os
 from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
 from pprint import pprint
+from bs4 import BeautifulSoup
 
 #TVSHOES!!
 
@@ -64,7 +65,7 @@ def populate_database(cursor, item):
 
 def tv_shows():
     # create a path to the databas
-    db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'TV_shows74.db')
+    db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'TOP100.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -98,16 +99,16 @@ def music():
     pl_id = 'spotify:playlist:4hOKQuZbraPDIfaGbM3lKI'
     offset = 0
     path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path + '/' + 'songs.db')
+    conn = sqlite3.connect(path + '/' + 'TOP100.db')
     cur = conn.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS songs (title TEXT, runtime TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS songs (title TEXT, runtime TEXT, year TEXT)")
     cur.execute("SELECT COUNT(*) FROM songs")
     num = cur.fetchone()[0]
     if num==100:
         return
 
 
-    
+    #
    
 
     
@@ -116,21 +117,22 @@ def music():
     for i in range(num,num+25):
             response = sp.playlist_items(pl_id,
                                     offset=offset,
-                                    fields='items.track.name,items.track.duration_ms,total',
+                                    fields='items.track.name,items.track.duration_ms,items.track.album.release_date, total',
                                     additional_types=['track'])
             track= response["items"][i]
             track_name = track['track']['name']
             track_duration_ms = track['track']['duration_ms']
+            track_year=track['track']['album']['release_date']
             track_duration_min = track_duration_ms / 60000  # Convert duration from milliseconds to minutes
-            print(f"{track_name} - {track_duration_min:.2f} minutes")
-            cur.execute("INSERT INTO songs (title, runtime) VALUES (?, ?)", (track_name, track_duration_min))
+            print(f"{track_name} - {track_duration_min:.2f} minutes {track_year}")
+            cur.execute("INSERT INTO songs (title, runtime, year) VALUES (?, ?, ?)", (track_name, track_duration_min, track_year))
             conn.commit()
     conn.close()
 
 #MOVIES
 def movies():
     path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path + '/' + 'movies.db')
+    conn = sqlite3.connect(path + '/' + 'TOP100.db')
     cur = conn.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, runtime TEXT, genre TEXT, rating FLOAT)")
     
@@ -153,26 +155,29 @@ def movies():
         data = response.json()
         all_movies.append(data)
 
-    num = len(cur.fetchall())
+    cur.execute("SELECT COUNT(*) FROM movies")
+    num = cur.fetchone()[0]
+    if num==100:
+        return
 
-    for i in range(num, 25):
+    for i in range(num, num+ 25):
         movie = all_movies[i]
         if movie["Response"] == "False":
-             all_movies.remove(movie)
-        else:
-            title = movie["Title"]
-            year = movie["Year"]
-            runtime = movie["Runtime"]
-            genre = movie["Genre"]
-            rating = movie["imdbRating"]
+            all_movies.remove(movie)
+        movie = all_movies[i]
+        title = movie["Title"]
+        year = movie["Year"]
+        runtime = movie["Runtime"]
+        genre = movie["Genre"]
+        rating = movie["imdbRating"]
 
-            cur.execute("INSERT INTO movies (title, year, runtime, genre, rating) VALUES (?, ?, ?, ?, ?)", (title, year, runtime, genre, rating))
-            conn.commit()
+        cur.execute("INSERT INTO movies (title, year, runtime, genre, rating) VALUES (?, ?, ?, ?, ?)", (title, year, runtime, genre, rating))
+        conn.commit()
 
     conn.close()
 
 
 #calling functions
-music()
+#music()
 movies()
-tv_shows()
+#tv_shows()

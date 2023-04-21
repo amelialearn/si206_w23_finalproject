@@ -91,8 +91,6 @@ def avg_imdb():
 
     conn.close()
 
-
-
 def rating_runtime():      
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + "TOP100.db")
@@ -209,8 +207,6 @@ def year_runtime():
             final_t[int(key)] = total/len(value)
         else:
             final_t[int(key)] = float(value[0])
-
-    
     
     #MUSIC YEARS VS RUNTIME
     cur.execute("SELECT year, runtime FROM songs")
@@ -235,19 +231,13 @@ def year_runtime():
         else:
             final_mus[int(key)] = value[0]
 
-
     sorted_m = dict(sorted(final_m.items(), key=lambda item: item[0]))
     sorted_t = dict(sorted(final_t.items(), key=lambda item: item[0]))
     sorted_mus = dict(sorted(final_mus.items(), key=lambda item: item[0]))
 
-    
     m_counts = list(sorted_m.values())
     t_counts = list(sorted_t.values())
     mus_counts=list(sorted_mus.values())
-
-
-
-    #x_axis = np.arange(len(movie_run))
 
     plt.plot(list(sorted_m.keys()), m_counts, label = "Movies")
     plt.xlabel('Year')
@@ -269,15 +259,56 @@ def year_runtime():
 
     conn.close()
     
+def genre_rating():
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path + '/' + "TOP100.db")
+    cur = conn.cursor()
 
+    #movie genre vs imdb rating
+    cur.execute("SELECT genre, rating FROM movies")
+    rows = cur.fetchall() #genre, rating
 
+    d = {}
+
+    for item in rows:
+        if item[0].split()[0] not in d:
+            lst = []
+            lst.append(item[1])
+            if item[0].split()[0][-1] == ",":
+                new_item = (item[0].split()[0])[:-1]
+            else:
+                new_item = item[0].split()[0]
+            d[new_item] = lst
+        else:
+            if item[0].split()[0][-1] == ",":
+                new_item = (item[0].split()[0])[:-1]
+            else:
+                new_item = item[0].split()[0]
+            d[new_item].append(item[1])
+
+    final_d = {}
+    for key, value in d.items():
+        total = 0
+        if len(value) > 1:
+            for time in value:
+                total += time
+            final_d[key] = total/len(value)
+        else:
+            final_d[key] = value[0]
+
+    x_axis = list(final_d.values())
+    counts = list(final_d.keys())
+
+    plt.barh(counts, x_axis)
+
+    plt.xlabel('IMDb Rating')
+    plt.ylabel('Movie Genre')
+    plt.title('Average IMDb Rating per Movie Genre')
+    plt.show()
+
+    conn.close() 
     
-rating_runtime()
-avg_imdb()#GREEN CHUNK?
-year_runtime()
-
-
-#songs
-#movies
-#tv_shows - name and runtime and year
-#show_info - imdb rating
+#rating_runtime()
+#avg_imdb()#GREEN CHUNK?
+#year_runtime()
+genre_rating()

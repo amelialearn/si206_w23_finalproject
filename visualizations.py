@@ -79,6 +79,7 @@ def avg_imdb():
         t_counts.append(list(td.values())[1])
 
     x_axis = np.arange(len(x))
+    plt.figure().set_figheight(7)
     plt.bar(x_axis - 0.2, m_counts, 0.4, label = 'Average Movie Rating')
     plt.bar(x_axis + 0.2, t_counts, 0.4, label = 'Average TV Show Rating')
 
@@ -271,28 +272,23 @@ def year_runtime():
     file.close()
 
     #plot
-    #plt.subplot(1, 2, 1)
-    plt.plot(list(sorted_m.keys()), m_counts, label = "Movies")
-    plt.xlabel('Year')
-    plt.ylabel('Runtime (mins)')
-    plt.title('Movie Runtime Over the Years')
-    plt.show()
+    fig, axs = plt.subplots(1, 3, figsize=(12,4))
+    axs[0].plot(list(sorted_m.keys()), m_counts, label = "Movies")
+    axs[0].set_xlabel('Year')
+    axs[0].set_ylabel('Runtime (mins)')
+    axs[0].set_title('Movie Runtime Over the Years')
 
-    #plt.subplot(1, 2, 2)
-    plt.plot(list(sorted_t.keys()), t_counts, label = "TV Shows")
-    plt.xlabel('Year')
-    plt.ylabel('Runtime (mins)')
-    plt.title('TV Runtime Over the Years')
-    plt.show()
+    axs[1].plot(list(sorted_t.keys()), t_counts, label = "TV Shows")
+    axs[1].set_xlabel('Year')
+    axs[1].set_ylabel('Runtime (mins)')
+    axs[1].set_title('TV Runtime Over the Years')
 
-    #plt.subplot(1, 2, 3)
-    plt.plot(list(sorted_mus.keys()), mus_counts, label = "Songs")
-    plt.xlabel('Year')
-    plt.ylabel('Runtime (mins)')
-    plt.title('Music Runtime Over the Years')
+    axs[2].plot(list(sorted_mus.keys()), mus_counts, label = "Songs")
+    axs[2].set_xlabel('Year')
+    axs[2].set_ylabel('Runtime (mins)')
+    axs[2].set_title('Music Runtime Over the Years')
+    
     plt.show()
-
-    plt.tight_layout()
 
     conn.close()
     
@@ -333,6 +329,7 @@ def genre_rating():
         else:
             final_d[key] = value[0]
 
+    plt.figure().set_figwidth(10)
     x_axis = list(final_d.values())
     counts = list(final_d.keys())
 
@@ -346,6 +343,6 @@ def genre_rating():
     conn.close() 
     
 rating_runtime()
-avg_imdb() #GREEN CHUNK?
+avg_imdb()
 year_runtime()
 genre_rating()

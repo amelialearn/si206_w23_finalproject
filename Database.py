@@ -115,13 +115,6 @@ def music():
     if num==100:
         return
 
-
-    #
-   
-
-    
-        
-
     for i in range(num,num+25):
             response = sp.playlist_items(pl_id,
                                     offset=offset,
@@ -130,7 +123,7 @@ def music():
             track= response["items"][i]
             track_name = track['track']['name']
             track_duration_ms = track['track']['duration_ms']
-            track_year=track['track']['album']['release_date']
+            track_year=int(track['track']['album']['release_date'][:4])
             track_duration_min = track_duration_ms / 60000  # Convert duration from milliseconds to minutes
             #print(f"{track_name} - {track_duration_min:.2f} minutes {track_year}")
             cur.execute("INSERT INTO songs (title, runtime, year) VALUES (?, ?, ?)", (track_name, track_duration_min, track_year))

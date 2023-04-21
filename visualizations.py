@@ -130,19 +130,22 @@ def runtime_rate():
         if item[0] == 9.3:
             mcount93 += 1
             mtotal93 += item[1]
-            tcount93 += 1
-            ttotal93 += int(item[3])
         elif item[0] == 8.3:
             mcount83 += 1
             mtotal83 += item[1]
-            tcount83 += 1
-            ttotal83 += int(item[3])
         elif item[0] == 7.3:
             mcount73 += 1
             mtotal73 += item[1]
+        elif item[2] != "" and float(item[2]) == 9.3:
+            tcount93 += 1
+            ttotal93 += int(item[3])
+        elif item[2] != "" and float(item[2]) == 8.3:
+            tcount83 += 1
+            ttotal83 += int(item[3])
+        elif item[2] != "" and float(item[2]) == 7.3:
             tcount73 += 1
             ttotal73 += int(item[3])
-    
+
     mavg93 = mtotal93/mcount93
     mavg83 = mtotal83/mcount83
     mavg73 = mtotal73/mcount73

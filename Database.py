@@ -142,7 +142,7 @@ def movies():
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + 'TOP100.db')
     cur = conn.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, runtime TEXT, genre TEXT, rating FLOAT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS movies (id INTEGER PRIMARY KEY, title TEXT, year INTEGER, runtime_mins TEXT, genre TEXT, rating FLOAT)")
     
     list_movies = []
 
@@ -175,17 +175,18 @@ def movies():
         movie = all_movies[i]
         title = movie["Title"]
         year = movie["Year"]
-        runtime = movie["Runtime"]
+        runtime_with_min = movie["Runtime"]
+        runtime = runtime_with_min.split()[0]
         genre = movie["Genre"]
         rating = movie["imdbRating"]
 
-        cur.execute("INSERT INTO movies (title, year, runtime, genre, rating) VALUES (?, ?, ?, ?, ?)", (title, year, runtime, genre, rating))
+        cur.execute("INSERT INTO movies (title, year, runtime_mins, genre, rating) VALUES (?, ?, ?, ?, ?)", (title, year, runtime, genre, rating))
         conn.commit()
 
     conn.close()
 
 
 #calling functions
+music()
 movies()
 tv_shows()
-music()

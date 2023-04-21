@@ -58,8 +58,10 @@ def populate_database(cursor, item):
     # add information to db the item and fetch the runtime information
     show_id = item['id']
     title = item['title']
-    year = item['year']
+    year = int(item['year'])
     imdb_rating = item['imDbRating']
+    if imdb_rating != "":
+        imdb_rating = float(imdb_rating)
     url = f"https://www.imdb.com/title/{show_id}/"
     runtime = get_runtime(url)
 
@@ -167,11 +169,13 @@ def movies():
             all_movies.remove(movie)
         movie = all_movies[i]
         title = movie["Title"]
-        year = movie["Year"]
+        year = int(movie["Year"])
         runtime_with_min = movie["Runtime"]
         runtime = int(runtime_with_min.split()[0])
         genre = movie["Genre"]
         rating = movie["imdbRating"]
+        if rating != "":
+            rating = float(rating)
 
         cur.execute("INSERT INTO movies (title, year, runtime_mins, genre, rating) VALUES (?, ?, ?, ?, ?)", (title, year, runtime, genre, rating))
         conn.commit()

@@ -137,7 +137,7 @@ description: This function populates the song table in the database with informa
 def music():
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
-    pl_id = 'spotify:playlist:4hOKQuZbraPDIfaGbM3lKI'
+    pl_id = 'spotify:playlist:6i2Qd6OpeRBAzxfscNXeWp'
     offset = 0
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + 'TOP100.db')

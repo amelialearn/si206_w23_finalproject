@@ -9,15 +9,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np 
 
-def avg_length():
-    path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path + '/' + "TOP100.db")
-    cur = conn.cursor()
-
-    #average length over a certain period of time
-    #cur.execute("SELECT songs.runtime, movies.runtime, tv_shows.runtime, songs.year, movies.year, tv_shows.year FROM movies INNER JOIN tv_shows ON restaurants.building_id = buildings.id INNER JOIN categories ON restaurants.category_id = categories.id")
-    #rows = cur.fetchall()
-    pass
 
 def avg_imdb():
     path = os.path.dirname(os.path.abspath(__file__))
@@ -100,9 +91,9 @@ def avg_imdb():
 
     conn.close()
 
-avg_imdb() #GREEN CHUNK??
 
-def rate_runtime():      
+
+def rating_runtime():      
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + "TOP100.db")
     cur = conn.cursor()
@@ -170,15 +161,121 @@ def rate_runtime():
     plt.show()
 
     conn.close()
+
+def year_runtime():
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path + '/' + "TOP100.db")
+    cur = conn.cursor()
+
+    #MOVIE RUNTIME VS YEARS
+    cur.execute("SELECT year, runtime_mins FROM movies")
+    mrows = cur.fetchall() #movie rating, movies runtime
+    movied = {}
+
+    for item in mrows:
+        if item[0] not in movied:
+            mlist = []
+            mlist.append(item[1])
+            movied[item[0]] = mlist
+        else:
+            movied[item[0]].append(item[1])
+
+    final_m = {}
+    for key, value in movied.items():
+        if len(value) > 1:
+            final_m[key] = sum(value)/len(value)
+        else:
+            final_m[key] = value[0]
     
-rate_runtime()
+    #TV_SHOW YEARS VS RUNTIME
+    cur.execute("SELECT year, runtime FROM tv_shows")
+    trows = cur.fetchall() #tv rating, tv runtime
+    tvd = {}
 
-def imdb_genre():
-    #average imdb rating based on genre
-    pass
+    for item in trows:
+        if item[0] not in tvd and item[0] != "" and item[1] != "N/A":
+            tlist = []
+            tlist.append(item[1])
+            tvd[item[0]] = tlist
+        elif item[0] in tvd and item[0] != "" and item[1] != "N/A":
+            tvd[item[0]].append(item[1])
 
-def write_data():
-    pass
+    final_t = {}
+    for key, value in tvd.items():
+        total = 0
+        if len(value) > 1:
+            for time in value:
+                total += int(time)
+            final_t[int(key)] = total/len(value)
+        else:
+            final_t[int(key)] = float(value[0])
+
+    
+    
+    #MUSIC YEARS VS RUNTIME
+    cur.execute("SELECT year, runtime FROM songs")
+    musrows = cur.fetchall() #movie rating, movies runtime
+    musicd = {}
+
+    for item in musrows:
+        if item[0] not in musicd:
+            mlist = []
+            mlist.append(float(item[1]))
+            musicd[item[0]] = mlist
+        else:
+            musicd[item[0]].append(item[1])
+
+    final_mus = {}
+    for key, value in musicd.items():
+        total = 0         
+        if len(value) > 1:
+            for time in value:
+                total += float(time)
+            final_mus[int(key)] = total/len(value)
+        else:
+            final_mus[int(key)] = value[0]
+
+
+    sorted_m = dict(sorted(final_m.items(), key=lambda item: item[0]))
+    sorted_t = dict(sorted(final_t.items(), key=lambda item: item[0]))
+    sorted_mus = dict(sorted(final_mus.items(), key=lambda item: item[0]))
+
+    
+    m_counts = list(sorted_m.values())
+    t_counts = list(sorted_t.values())
+    mus_counts=list(sorted_mus.values())
+
+
+
+    #x_axis = np.arange(len(movie_run))
+
+    plt.plot(list(sorted_m.keys()), m_counts, label = "Movies")
+    plt.xlabel('Year')
+    plt.ylabel('Runtime (mins)')
+    plt.title('Movie Runtime Over the Years')
+    plt.show()
+
+    plt.plot(list(sorted_t.keys()), t_counts, label = "TV Shows")
+    plt.xlabel('Year')
+    plt.ylabel('Runtime (mins)')
+    plt.title('TV Runtime Over the Years')
+    plt.show()
+
+    plt.plot(list(sorted_mus.keys()), mus_counts, label = "Songs")
+    plt.xlabel('Year')
+    plt.ylabel('Runtime (mins)')
+    plt.title('Music Runtime Over the Years')
+    plt.show()
+
+    conn.close()
+    
+
+
+    
+rating_runtime()
+avg_imdb()#GREEN CHUNK?
+year_runtime()
+
 
 #songs
 #movies

@@ -12,7 +12,7 @@ import spotipy
 from pprint import pprint
 from bs4 import BeautifulSoup
 
-#TVSHOES!!
+#TVSHOWS!!
 
 # sources: https://www.w3resource.com/sql/creating-and-maintaining-tables/primary-key.php
 #          https://www.youtube.com/watch?v=FrTQSPSbVC0
@@ -64,7 +64,7 @@ def populate_database(cursor, item):
     cursor.execute("INSERT OR IGNORE INTO tv_shows (key_ID, imdb_ID, year, title, runtime) VALUES (?, ?, ?, ?, ?)", (title_id, show_id, year, title, runtime))
 
 def tv_shows():
-    # create a path to the databas
+    # create a path to the database
     db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'TOP100.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -124,7 +124,7 @@ def music():
             track_duration_ms = track['track']['duration_ms']
             track_year=track['track']['album']['release_date']
             track_duration_min = track_duration_ms / 60000  # Convert duration from milliseconds to minutes
-            print(f"{track_name} - {track_duration_min:.2f} minutes {track_year}")
+            #print(f"{track_name} - {track_duration_min:.2f} minutes {track_year}")
             cur.execute("INSERT INTO songs (title, runtime, year) VALUES (?, ?, ?)", (track_name, track_duration_min, track_year))
             conn.commit()
     conn.close()
@@ -160,7 +160,7 @@ def movies():
     if num==100:
         return
 
-    for i in range(num, num+ 25):
+    for i in range(num, num + 25):
         movie = all_movies[i]
         if movie["Response"] == "False":
             all_movies.remove(movie)
@@ -178,6 +178,6 @@ def movies():
 
 
 #calling functions
-#music()
 movies()
-#tv_shows()
+tv_shows()
+music()

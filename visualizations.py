@@ -82,7 +82,6 @@ def avg_imdb():
     plt.bar(x_axis - 0.2, m_counts, 0.4, label = 'Average Movie Rating')
     plt.bar(x_axis + 0.2, t_counts, 0.4, label = 'Average TV Show Rating')
 
-    plt.bar(x, x_axis)
     plt.xlabel('Decades')
     plt.ylabel('Average IMDb Rating')
     plt.title('Average IMDb Rating per Decade')
@@ -151,7 +150,6 @@ def rating_runtime():
     m_counts = list(sorted_m.values())
     t_counts = list(sorted_t.values())
 
-    #x_axis = np.arange(len(movie_run))
     plt.plot(x_axis, m_counts, label = "Movies")
     plt.plot(x_axis, t_counts, label = "TV Shows")
 
@@ -273,25 +271,28 @@ def year_runtime():
     file.close()
 
     #plot
-    
-
+    #plt.subplot(1, 2, 1)
     plt.plot(list(sorted_m.keys()), m_counts, label = "Movies")
     plt.xlabel('Year')
     plt.ylabel('Runtime (mins)')
     plt.title('Movie Runtime Over the Years')
     plt.show()
 
+    #plt.subplot(1, 2, 2)
     plt.plot(list(sorted_t.keys()), t_counts, label = "TV Shows")
     plt.xlabel('Year')
     plt.ylabel('Runtime (mins)')
     plt.title('TV Runtime Over the Years')
     plt.show()
 
+    #plt.subplot(1, 2, 3)
     plt.plot(list(sorted_mus.keys()), mus_counts, label = "Songs")
     plt.xlabel('Year')
     plt.ylabel('Runtime (mins)')
     plt.title('Music Runtime Over the Years')
     plt.show()
+
+    plt.tight_layout()
 
     conn.close()
     

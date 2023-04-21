@@ -62,7 +62,7 @@ def avg_imdb():
     d = {"1990s": {"avg movie rating": mavg1990, "avg tv show rating": tavg1990}, "2000s": {"avg movie rating": mavg2000, "avg tv show rating": tavg2000}, "2010s": {"avg movie rating": mavg2010, "avg tv show rating": tavg2010}}
     
     #write to json
-    file = open("avg_imdb_rating.json", "w")
+    file = open("imdb_rating_calculations.json", "w")
     dj = json.dumps(d)
     file.write(dj)
     file.close()
@@ -239,6 +239,39 @@ def year_runtime():
     t_counts = list(sorted_t.values())
     mus_counts=list(sorted_mus.values())
 
+    #slope calculations
+    start_m = list(sorted_m.keys())[0]
+    end_m = list(sorted_m.keys())[-1]
+    start_m_val = list(sorted_m.values())[0]
+    end_m_val = list(sorted_m.values())[-1]
+
+    slope_m = (end_m_val - start_m_val) / (end_m - start_m)
+    
+    start_t = list(sorted_t.keys())[0]
+    end_t = list(sorted_t.keys())[-1]
+    start_t_val = list(sorted_t.values())[0]
+    end_t_val = list(sorted_t.values())[-1]
+
+    slope_t = (end_t_val - start_t_val) / (end_t - start_t)
+
+    start_mus = list(sorted_mus.keys())[0]
+    end_mus = list(sorted_mus.keys())[-1]
+    start_mus_val = list(sorted_mus.values())[0]
+    end_mus_val = list(sorted_mus.values())[-1]
+
+    slope_mus = (end_mus_val - start_mus_val) / (end_mus - start_mus)
+
+    calc_d = {"Movie Slope": slope_m, "TV Show Slope": slope_t, "Music Slope": slope_mus}
+       
+    #write to json
+    file = open("slope_calculations.json", "w")
+    djson = json.dumps(calc_d)
+    file.write(djson)
+    file.close()
+
+    #plot
+    
+
     plt.plot(list(sorted_m.keys()), m_counts, label = "Movies")
     plt.xlabel('Year')
     plt.ylabel('Runtime (mins)')
@@ -308,7 +341,7 @@ def genre_rating():
 
     conn.close() 
     
-#rating_runtime()
-#avg_imdb()#GREEN CHUNK?
-#year_runtime()
+rating_runtime()
+avg_imdb() #GREEN CHUNK?
+year_runtime()
 genre_rating()

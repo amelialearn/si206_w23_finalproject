@@ -4,7 +4,6 @@
 #API DATABASE FILE
 
 import requests
-import json
 import sqlite3
 import os
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -12,14 +11,20 @@ import spotipy
 from pprint import pprint
 from bs4 import BeautifulSoup
 
-#TVSHOWS!!
+# TV SHOWS
+"""
+input: url (string) - TV Show page from IMDB website
 
-# sources: https://www.w3resource.com/sql/creating-and-maintaining-tables/primary-key.php
-#          https://www.youtube.com/watch?v=FrTQSPSbVC0
-#          https://www.youtube.com/watch?v=I5L3OJ-xtsw
-#          https://www.youtube.com/watch?v=Anxj5AmSG2E
+output: runtime (int) - returns runtime (in minutes) as an integer 
+                        if no runtime exists, return "N/A"
 
-# this function uses BeautifulSoup to extract the runtime from each tv show's imdb page
+description: This function takes the url of the IMDB TV Show page and 
+             uses BeautifulSoup to parse through the html and extract
+             the runtime as a string. Then, the function checks the
+             format of the runtime information and converts the time 
+             into an integer representing the total runtime in minutes.
+             If no runtime exists, the function returns "N/A as a string
+"""
 def get_runtime(url):
     # saw this on https://www.youtube.com/watch?v=I5L3OJ-xtsw
     # sends a request to the imdb url
@@ -46,14 +51,18 @@ def get_runtime(url):
     else:
         return 'N/A'
 
-# creats a new table (if it doesn't exist) in the database called "tv_shows"
-def create_tv_shows_table(cursor):
-    cursor.execute("CREATE TABLE IF NOT EXISTS tv_shows (key_ID INTEGER PRIMARY KEY, imdb_ID TEXT UNIQUE, year TEXT, title TEXT, runtime TEXT, FOREIGN KEY (key_ID) REFERENCES show_info(key_ID))")
+"""
+input: cursor, item - item is a dictionary with TV Show information (title,
+                      year, IMDB rating, and IMDB id)
 
-# creats a new table (if it doesn't exist) in the database called "show_info"
-def create_show_info_table(cursor):
-    cursor.execute("CREATE TABLE IF NOT EXISTS show_info (key_ID INTEGER PRIMARY KEY, imdb_rating TEXT)")
+output: None
 
+description: This function takes takes a dictionary containing TV show information
+             and adds the key_id, show id, title, and runtime (calls get_runtime) to the 
+             'tv shows' table in the database, if it does not already exist. It also 
+             uses a primary integer key, key_ID to input the IMDB rating data for the 
+             corresponsing movie in the show_info table. 
+"""
 def populate_database(cursor, item):
     # add information to db the item and fetch the runtime information
     show_id = item['id']
@@ -73,15 +82,27 @@ def populate_database(cursor, item):
     # add to the tv_shows table
     cursor.execute("INSERT OR IGNORE INTO tv_shows (key_ID, imdb_ID, year, title, runtime) VALUES (?, ?, ?, ?, ?)", (title_id, show_id, year, title, runtime))
 
+"""
+input: None
+
+output: None
+
+description: This function retrieves the most popular TV shows from the IMDB API
+             and checks if the TV show is already in the table. If it is not, the
+             function calls populate_database and adds information to the database
+             for 25 TV shows.
+"""
 def tv_shows():
     # create a path to the database
     db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'TOP100.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    create_show_info_table(cursor)
-    create_tv_shows_table(cursor)
-
+    # creats a new table (if it doesn't exist) in the database called "tv_shows"
+    cursor.execute("CREATE TABLE IF NOT EXISTS tv_shows (key_ID INTEGER PRIMARY KEY, imdb_ID TEXT UNIQUE, year TEXT, title TEXT, runtime TEXT, FOREIGN KEY (key_ID) REFERENCES show_info(key_ID))")
+    # creats a new table (if it doesn't exist) in the database called "show_info"
+    cursor.execute("CREATE TABLE IF NOT EXISTS show_info (key_ID INTEGER PRIMARY KEY, imdb_rating TEXT)")
+   
     # get tv shows from IMDB API
     data = requests.get("https://imdb-api.com/en/API/MostPopularTVs/k_i1gw86cb").json()
     new_items = 0
@@ -102,7 +123,17 @@ def tv_shows():
     conn.commit()
     conn.close()
 
-#MUSIC!!!!!
+"""
+input: None
+
+output: None
+
+description: This function populates the song table in the database with information
+             about songs from a Spotify playlist. It uses the Spotify API to retrieve
+             the song title, duration, and release year. This function checks the number
+             of rows in the songs table, and if there are less than 100, it will add 
+             the specified information for 25 songs in the playlist.
+"""
 def music():
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
@@ -126,13 +157,24 @@ def music():
             track_name = track['track']['name']
             track_duration_ms = track['track']['duration_ms']
             track_year=int(track['track']['album']['release_date'][:4])
-            track_duration_min = track_duration_ms / 60000  # Convert duration from milliseconds to minutes
-            #print(f"{track_name} - {track_duration_min:.2f} minutes {track_year}")
+            track_duration_min = track_duration_ms / 60000
             cur.execute("INSERT INTO songs (title, runtime, year) VALUES (?, ?, ?)", (track_name, track_duration_min, track_year))
             conn.commit()
     conn.close()
 
-#MOVIES
+"""
+input: None
+
+output: None
+
+description: This function retrieves the top rated Movies from the Movie DB 
+             API and collects information about those movies form the OMDB API. 
+             The function checks to see if the information exisits in the database,
+             if it doesn't it creates the table movies and adds the id, title, year
+             runtime in minutes, genre and IMDB rating. The function checks if there 
+             are already 100 movies in the database, if not, it adds the information 
+             from 25 new movies to the table.
+"""
 def movies():
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + '/' + 'TOP100.db')

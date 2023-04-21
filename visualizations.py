@@ -96,6 +96,7 @@ def avg_imdb():
     plt.bar(x_axis - 0.2, m_counts, 0.4, label = 'Average Movie Rating')
     plt.bar(x_axis + 0.2, t_counts, 0.4, label = 'Average TV Show Rating')
 
+    plt.xticks(x_axis, x)
     plt.xlabel('Decades')
     plt.ylabel('Average IMDb Rating')
     plt.title('Average IMDb Rating per Decade')
@@ -304,7 +305,7 @@ def year_runtime():
 
     slope_mus = (end_mus_val - start_mus_val) / (end_mus - start_mus)
 
-    calc_d = {"Movie Slope": slope_m, "TV Show Slope": slope_t, "Music Slope": slope_mus}
+    calc_d = {"Movie Runtime Over Years Slope": slope_m, "TV Show Runtime Over Years Slope": slope_t, "Music Runtime Over Years Slope": slope_mus}
        
     #write to json
     file = open("slope_calculations.json", "w")

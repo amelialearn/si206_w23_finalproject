@@ -141,8 +141,11 @@ def rating_runtime():
     
     sorted_m = dict(sorted(final_m.items(), key=lambda item: item[0]))
     sorted_t = dict(sorted(final_t.items(), key=lambda item: item[0]))
-    sorted_t.popitem()
-    sorted_t.popitem()
+    while(len(sorted_t)!=len(sorted_m)):
+        if(len(sorted_t)>len(sorted_m)):
+            sorted_t.popitem()
+        if(len(sorted_m)>len(sorted_t)):
+            sorted_m.popitem()
 
     x_axis = list(sorted_m.keys())
     m_counts = list(sorted_m.values())
